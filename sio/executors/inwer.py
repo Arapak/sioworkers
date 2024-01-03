@@ -70,7 +70,7 @@ def run(environ):
             add_to_cache=True)
     ft.download(environ, 'in_file', 'in', skip_if_exists=True,
             add_to_cache=True)
-    os.chmod(tempcwd('inwer'), 0500)
+    os.chmod(tempcwd('inwer'), 0o500)
 
     renv = _run_inwer(environ, use_sandboxes)
     if renv['result_code'] != "OK":

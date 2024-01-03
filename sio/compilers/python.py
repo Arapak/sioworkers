@@ -12,13 +12,13 @@ class PythonCompiler(Compiler):
 
     def _make_cmdline(self, executor):
         cmdline = [noquote(tempcwd(self.source_file))] #'/usr/bin/python3compile.py',  tempcwd(self.source_file)]
-        os.chmod(tempcwd(os.path.dirname(self.source_file)), 0777)
-        os.chmod(tempcwd(self.source_file), 0777)
+        os.chmod(tempcwd(os.path.dirname(self.source_file)), 0o777)
+        os.chmod(tempcwd(self.source_file), 0o777)
         return cmdline
 
     def _postprocess(self, renv):
         self.environ = super(PythonCompiler, self)._postprocess(renv)
-        if 'exec_info' in self.environ.keys():
+        if 'exec_info' in list(self.environ.keys()):
             self.environ['exec_info']['mode']='python3'
         return self.environ
 

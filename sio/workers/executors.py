@@ -1,3 +1,7 @@
+from builtins import map
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 import subprocess
 import tempfile
@@ -110,7 +114,7 @@ def execute_command(command, env=None, split_lines=False, stdin=None,
 
     ret_env = {}
     if env is not None:
-        for key, value in env.iteritems():
+        for key, value in env.items():
             env[key] = str(value)
 
     perf_timer = util.PerfTimer()
@@ -767,7 +771,7 @@ class BasicIsolateExecutor(UnprotectedExecutor):
             with open(self.meta_path) as mf:
                 for l in mf.read().split('\n'):
                     spl = l.split(':')
-                    if len(spl) >= 2 and spl[0].strip() not in res.keys():
+                    if len(spl) >= 2 and spl[0].strip() not in list(res.keys()):
                         res[spl[0].strip()] = ':'.join(spl[1:]).strip()
         except IOError:
             pass
@@ -824,17 +828,17 @@ class BasicIsolateExecutor(UnprotectedExecutor):
         return float(ic) / (2 * 10 ** 9)
 
     def get_time(self, renv):
-        if 'instructions' in self.meta.keys():
+        if 'instructions' in list(self.meta.keys()):
             return self.to_secs(self.meta['instructions'])
         else:
             raise RuntimeError('unable to get time. renv=%s meta=%s' % (str(renv), str(self.meta)))
 
     def get_result(self, renv):
-        if 'status' in self.meta.keys() and self.meta['status'] == 'TO':
+        if 'status' in list(self.meta.keys()) and self.meta['status'] == 'TO':
             return (self.meta['message'], 'TLE')
-        elif 'exitsig' in self.meta.keys():
+        elif 'exitsig' in list(self.meta.keys()):
             return ('program exited due to signal %s' % self.meta['exitsig'], 'RE')
-        elif 'status' in self.meta.keys() and self.meta['status'] == 'RE':
+        elif 'status' in list(self.meta.keys()) and self.meta['status'] == 'RE':
             return ('runtime error', 'RE')
         elif renv['return_code'] == 0:
             return ('ok', 'OK')

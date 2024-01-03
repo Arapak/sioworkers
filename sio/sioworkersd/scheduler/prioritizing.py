@@ -45,6 +45,8 @@ cpu. It can be judged on any worker (any-cpu or vcpu-only).
 Virtual-cpu tasks can be judged simultaneously on one worker.
 """
 
+from builtins import str
+from builtins import object
 from random import Random
 from collections import OrderedDict
 
@@ -73,7 +75,7 @@ class _OrderedSet(object):
     def __len__(self):
         return len(self.dict)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.dict)
 
     def add(self, value):
@@ -143,7 +145,7 @@ class TaskInfo(object):
 
     def __init__(self, env, contest):
         assert ('task_priority' not in env or
-            isinstance(env['task_priority'], (int, long)))
+            isinstance(env['task_priority'], int))
         # Immutable data
         self.id = env['task_id']
         self.real_cpu = (env['job_type'] == 'cpu-exec')
@@ -165,8 +167,8 @@ class ContestInfo(object):
     """
 
     def __init__(self, contest_uid, priority, weight):
-        assert isinstance(priority, (int, long))
-        assert isinstance(weight, (int, long))
+        assert isinstance(priority, int)
+        assert isinstance(weight, int)
         assert weight >= 1
         # Immutable data
         self.uid = contest_uid
@@ -187,7 +189,7 @@ class TasksQueues(object):
         # Map from contest to SortedSet of queued tasks in that contest.
         self.queues = {}
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.queues)
 
     def addTask(self, task):
@@ -228,7 +230,7 @@ class TasksQueues(object):
 
         max_contest_priority = None
         contests_weights_sum = None
-        for contest in self.queues.iterkeys():
+        for contest in self.queues.keys():
             current_contest_priority = contest.priority
             if (max_contest_priority is None
                     or current_contest_priority > max_contest_priority):
@@ -240,7 +242,7 @@ class TasksQueues(object):
         random_value = self.random.randint(1, contests_weights_sum)
         contests_weights_prefix_sum = 0
         best_contest = None
-        for contest in self.queues.iterkeys():
+        for contest in self.queues.keys():
             if contest.priority != max_contest_priority:
                 continue
             contests_weights_prefix_sum += contest.weight
@@ -303,7 +305,7 @@ class PrioritizingScheduler(Scheduler):
 
            Used for debugging and displaying in the admin panel.
         """
-        return unicode((self.tasks_queues, self.waiting_real_cpu_tasks))
+        return str((self.tasks_queues, self.waiting_real_cpu_tasks))
 
     # Worker scheduling
 
@@ -396,8 +398,8 @@ class PrioritizingScheduler(Scheduler):
 
     def updateContest(self, contest_uid, priority, weight):
         """Update contest priority and weight in scheduler memory."""
-        assert isinstance(priority, (int, long))
-        assert isinstance(weight, (int, long))
+        assert isinstance(priority, int)
+        assert isinstance(weight, int)
         assert weight >= 1
         contest = self.contests.get(contest_uid)
         if contest is None:

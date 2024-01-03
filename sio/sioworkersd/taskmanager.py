@@ -5,15 +5,15 @@ from twisted.python.failure import Failure
 from twisted.web import client
 from twisted.web.http_headers import Headers
 from collections import namedtuple
-import bsddb
+import bsddb3
 import json
-from StringIO import StringIO
-from poster import encode
+from io import StringIO
 import time
 from operator import itemgetter
 from sio.protocol.rpc import RemoteError
 from sio.sioworkersd.workermanager import WorkerGone
 from twisted.logger import Logger, LogLevel
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 log = Logger()
 
@@ -42,7 +42,7 @@ class MultiException(Exception):
 class DBWrapper(object):
     def __init__(self, db_filename):
         # hashopen, cause we operate on single keys and do full scan at start.
-        self.db = bsddb.hashopen(db_filename)
+        self.db = bsddb3.hashopen(db_filename)
         # For better performance we are allowing some tasks to be executed
         # multiple times in case of server failure. Hence, we are skipping
         # specific database sync and doing it later with LoopingCall.
@@ -60,7 +60,7 @@ class DBWrapper(object):
                                      task=self.db_sync_task)
 
     def get_items(self):
-        return [json.loads(self.db[k]) for k in self.db.keys()]
+        return [json.loads(self.db[k]) for k in list(self.db.keys())]
 
     def update(self, job_id, dict_update, sync=True):
         job = json.loads(self.db.get(job_id, '{}'))
@@ -185,7 +185,7 @@ class TaskManager(Service):
         return d
 
     def getQueue(self):
-        return unicode(self.scheduler)
+        return str(self.scheduler)
 
     def _addGroup(self, group_env):
         singleTasks = []
@@ -195,7 +195,7 @@ class TaskManager(Service):
         self.scheduler.updateContest(contest_uid,
             group_env.get('contest_priority', 0),
             group_env.get('contest_weight', 1))
-        for k, v in group_env['workers_jobs'].iteritems():
+        for k, v in group_env['workers_jobs'].items():
             v['contest_uid'] = contest_uid
             idMap[v['task_id']] = k
             self.scheduler.addTask(v)
@@ -256,26 +256,12 @@ class TaskManager(Service):
         if not tid:
             tid = env['group_id']
 
-        bodygen, hdr = encode.multipart_encode({
-                        'data': json.dumps(env)})
-        body = ''.join(bodygen)
-
-        headers = Headers({'User-Agent': ['sioworkersd']})
-        for k, v in hdr.iteritems():
-            headers.addRawHeader(k, v)
+        mp_encoder = MultipartEncoder(fields=env)
+        headers = Headers({'User-Agent': ['sioworkersd'], 'Content-Type': mp_encoder.content_type})
 
         def do_return():
-            # This looks a bit too complicated for just POSTing a string,
-            # but there seems to be no other way. Blame Twisted.
-
-            # agent.request() will add content-length based on length
-            # from FileBodyProducer. If we have another in headers,
-            # there will be a duplicate, so remove it.
-            headers.removeHeader('content-length')
-
-            producer = client.FileBodyProducer(StringIO(body))
             d = self.agent.request('POST', url.encode('utf-8'),
-                    headers, producer)
+                    headers, mp_encoder)
 
             @defer.inlineCallbacks
             def _response(r):

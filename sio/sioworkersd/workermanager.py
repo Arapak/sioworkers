@@ -1,3 +1,4 @@
+from builtins import object
 from sio.sioworkersd import server
 from sio.protocol.rpc import TimeoutError
 from twisted.application import service
@@ -78,7 +79,7 @@ class WorkerManager(service.MultiService):
         # reject it
         try:
             worker = Worker(proto.clientInfo, set(), False)
-        except Exception, e:
+        except Exception as e:
             log.warn('Rejecting worker {w} because it sent invalid ({e})'
                     ' client info: {d}', w=name, e=e, d=proto.clientInfo)
             raise server.WorkerRejected()

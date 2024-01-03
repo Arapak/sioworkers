@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import object
 from sio.sioworkersd.scheduler import Scheduler
 from collections import deque, namedtuple
 
@@ -62,14 +64,14 @@ class FIFOScheduler(Scheduler):
         if tid not in self.tasks:
             return
         self.tasks.remove(tid)
-        for queue in self.queues.itervalues():
+        for queue in self.queues.values():
             for i, task in enumerate(queue):
                 if tid == task.id:
                     del queue[i]
                     break
 
     def __unicode__(self):
-        return unicode(self.queue)
+        return str(self.queue)
 
     def _scheduleQueueWith(self, queue, workers):
         """Schedule tasks from a queue using given workers.
@@ -102,7 +104,7 @@ class FIFOScheduler(Scheduler):
         # cpu-exec jobs) to deques of workers. A worker may belong to any
         # number of deques.
         workers = {'cpu+vcpu': [], 'vcpu': []}
-        for wid, wdata in self.manager.getWorkers().iteritems():
+        for wid, wdata in self.manager.getWorkers().items():
             worker = WorkerInfo(wid, wdata)
             if worker.tasks_count >= worker.concurrency \
                     or worker.is_running_cpu_exec:

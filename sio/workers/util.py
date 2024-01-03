@@ -53,7 +53,7 @@ def ceil_ms2s(miliseconds):
        >>> ceil_ms2s(1001)
        2
     """
-    return int((miliseconds + 999) / 1000)
+    return int((miliseconds + 999)/ 1000)
 
 class Writable(object):
     """Context manager making file writable.
@@ -150,10 +150,8 @@ class ClassInitMeta(type):
         cls.__classinit__()
 
 
-class ClassInitBase(object):
+class ClassInitBase(metaclass=ClassInitMeta):
     """Abstract base class injecting ClassInitMeta meta class."""
-
-    __metaclass__ = ClassInitMeta
 
     @classmethod
     def __classinit__(cls):

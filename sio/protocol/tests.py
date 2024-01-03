@@ -1,3 +1,4 @@
+from builtins import str
 from twisted.trial import unittest
 from twisted.test import proto_helpers
 from twisted.internet import protocol, reactor

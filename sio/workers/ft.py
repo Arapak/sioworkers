@@ -1,5 +1,5 @@
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import time
 import shutil
 import logging
@@ -177,9 +177,9 @@ def launch_filetracker_server():
         return
     public_url = os.environ['FILETRACKER_PUBLIC_URL'].split()[0]
     try:
-        urllib2.urlopen(public_url + '/status')
+        urllib.request.urlopen(public_url + '/status')
         return
-    except urllib2.URLError, e:
+    except urllib.error.URLError as e:
         logger.info('No Filetracker at %s (%s), launching', public_url, e)
         _do_launch()
 

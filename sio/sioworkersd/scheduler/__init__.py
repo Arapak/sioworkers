@@ -1,3 +1,4 @@
+from builtins import object
 class Scheduler(object):
     """Abstract scheduler interface.
     """

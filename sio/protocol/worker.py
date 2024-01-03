@@ -32,7 +32,7 @@ class WorkerProtocol(rpc.WorkerRPC):
                 raise RuntimeError(
                         'Send cpu-exec job to worker which can\'t run it')
         if any([(task['job_type'] == 'cpu-exec')
-                for task in self.running.itervalues()]):
+                for task in self.running.values()]):
             raise RuntimeError(
                     'Send job to worker already running cpu-exec job')
         task_id = env['task_id']

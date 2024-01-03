@@ -1,16 +1,15 @@
 import fcntl
 import os.path
-from hashlib import sha1
 import time
 import tarfile
 import shutil
 import logging
 import weakref
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import email
 import errno
 
-from sio.workers import ft, _original_cwd
+from sio.workers import ft
 from sio.workers.elf_loader_patch import _patch_elf_loader
 from sio.workers.util import rmtree
 
@@ -22,7 +21,7 @@ CHECK_INTERVAL = int(os.environ.get('SIO_SANDBOXES_CHECK_INTERVAL', 3600))
 
 logger = logging.getLogger(__name__)
 
-class SandboxError(StandardError):
+class SandboxError(Exception):
     pass
 
 def _filetracker_path(name):
@@ -33,8 +32,8 @@ def _urllib_path(name):
 
 def _mkdir(name):
     try:
-        os.makedirs(name, 0700)
-    except OSError, e:
+        os.makedirs(name, 0o700)
+    except OSError as e:
         if e.errno != errno.EEXIST:
             raise
 
@@ -58,7 +57,7 @@ class _FileLock(object):
     """
 
     def __init__(self, filename):
-        self.fd = os.open(filename, os.O_WRONLY | os.O_CREAT, 0600)
+        self.fd = os.open(filename, os.O_WRONLY | os.O_CREAT, 0o600)
 
     def lock_shared(self):
         fcntl.flock(self.fd, fcntl.LOCK_SH)
@@ -305,7 +304,7 @@ class Sandbox(object):
                     logger.info("  trying url: %s", url)
                     local_f = open(archive_path, 'wb')
                     try:
-                        http_f = urllib2.urlopen(url)
+                        http_f = urllib.request.urlopen(url)
                         shutil.copyfileobj(http_f, local_f)
                         local_f.close()
                     except:
@@ -360,7 +359,7 @@ class NullSandbox(object):
     def __exit__(self, exc_type, exc_value, traceback):
         pass
 
-    def __nonzero__(self):
+    def __bool__(self):
         return False
 
     @property
@@ -371,4 +370,4 @@ class NullSandbox(object):
 if __name__ == '__main__':
     import sys
     with get_sandbox(sys.argv[1]) as sandbox:
-        print sandbox.path
+        print(sandbox.path)

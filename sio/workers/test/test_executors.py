@@ -1,3 +1,4 @@
+from builtins import str
 import glob
 import os.path
 import re
@@ -87,7 +88,7 @@ def compile_and_execute(source, executor, **exec_args):
 
     ft.download({'exe_file': cenv['out_file']}, 'exe_file',
                 frunner.preferred_filename())
-    os.chmod(tempcwd('exe'), 0700)
+    os.chmod(tempcwd('exe'), 0o700)
     ft.download({'in_file': '/input'}, 'in_file', 'in')
 
     with frunner:
@@ -402,7 +403,7 @@ def test_ingen():
             eq_(env['stdout'], expected_output)
             collected = env['collected_files']
             eq_(len(expected_files), len(collected))
-            for filename, path in collected.iteritems():
+            for filename, path in collected.items():
                 in_(filename, expected_files)
                 unversioned_path = '/%s/%s' % (upload_dir, filename)
                 upload_re_str = '%s@\d+' % (unversioned_path)

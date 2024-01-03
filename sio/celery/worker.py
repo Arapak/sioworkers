@@ -2,14 +2,11 @@
 
 import os
 from optparse import OptionParser
-import urlparse
+import urllib.parse
 from celery import Celery
 from celery.bin.worker import worker
-import celery.loaders.default
-from filetracker.servers.run import DEFAULT_PORT as DEFAULT_FILETRACKER_PORT
-
 def _host_from_url(url):
-    return urlparse.urlparse(url).hostname
+    return urllib.parse.urlparse(url).hostname
 
 def main():
     usage = "usage: %prog [options] [broker-url]"
@@ -31,7 +28,6 @@ host as the Celery broker uses, with default Filetracker port."""
     if len(args) > 1:
         parser.error("Unexpected arguments: " + ' '.join(args[1:]))
     if args:
-        broker_url = args[0]
         os.environ['CELERY_BROKER_URL'] = args[0]
 
     return cmd.run(**vars(options))

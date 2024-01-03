@@ -90,7 +90,7 @@ def run(environ, use_sandboxes=True):
             ft.download(environ, 'in_file', 'in', skip_if_exists=True,
                     add_to_cache=True)
             ft.download(environ, 'chk_file', 'chk', add_to_cache=True)
-            os.chmod(tempcwd('chk'), 0700)
+            os.chmod(tempcwd('chk'), 0o700)
 
             output = _run_checker(environ, use_sandboxes)
         elif use_sandboxes:

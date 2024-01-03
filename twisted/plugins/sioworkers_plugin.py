@@ -1,7 +1,8 @@
-import urlparse
+import urllib.parse
 import importlib
 import platform
-from zope.interface import implements
+
+import zope
 
 from twisted.python import usage
 from twisted.plugin import IPlugin
@@ -16,7 +17,7 @@ from sio.sioworkersd import siorpc
 
 
 def _host_from_url(url):
-    return urlparse.urlparse(url).hostname
+    return urllib.parse.urlparse(url).hostname
 
 
 class WorkerOptions(usage.Options):
@@ -34,11 +35,10 @@ class WorkerOptions(usage.Options):
     def parseArgs(self, host):
         self['host'] = host
 
-
+@zope.interface.implementer(service.IServiceMaker, IPlugin)
 class WorkerServiceMaker(object):
     """Run worker process.
     """
-    implements(service.IServiceMaker, IPlugin)
     tapname = 'worker'
     description = 'sio worker process'
     options = WorkerOptions
@@ -64,8 +64,8 @@ class ServerOptions(usage.Options):
     ]
 
 
+@zope.interface.implementer(service.IServiceMaker, IPlugin)
 class ServerServiceMaker(object):
-    implements(service.IServiceMaker, IPlugin)
     tapname = 'sioworkersd'
     description = 'workers and jobs execution manager'
     options = ServerOptions
@@ -79,10 +79,10 @@ class ServerServiceMaker(object):
             SchedulerClass = \
                 getattr(importlib.import_module(sched_module), sched_class)
         except ImportError:
-            print "[ERROR] Invalid scheduler module: " + sched_module + "\n"
+            print("[ERROR] Invalid scheduler module: " + sched_module + "\n")
             raise
         except AttributeError:
-            print "[ERROR] Invalid scheduler class: " + sched_class + "\n"
+            print("[ERROR] Invalid scheduler class: " + sched_class + "\n")
             raise
 
         taskm = TaskManager(options['database'], workerm,

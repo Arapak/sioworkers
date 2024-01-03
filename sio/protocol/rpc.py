@@ -1,3 +1,4 @@
+from builtins import str
 from twisted.protocols.basic import NetstringReceiver
 from twisted.internet import defer, reactor
 from twisted.logger import Logger
@@ -68,7 +69,7 @@ class WorkerRPC(NetstringReceiver):
 
     def connectionLost(self, reason):
         NetstringReceiver.connectionLost(self, reason)
-        for (_, timer) in self.pendingCalls.itervalues():
+        for (_, timer) in self.pendingCalls.values():
             if not timer.called:
                 timer.cancel()
 

@@ -28,7 +28,7 @@ class Worker(object):
         self.can_run_cpu_exec = can_run_cpu_exec
 
     def printInfo(self):
-        print '%s, %s' % (str(self.info), str(self.tasks))
+        print('%s, %s' % (str(self.info), str(self.tasks)))
 # --------------------------------------------------------------------------#
 
 class Manager(object):
@@ -48,7 +48,7 @@ class Manager(object):
         self.workers[wid].tasks.append(task['task_id'])
 
     def _checkInnerState(self):
-        for wid, w in self.workers.iteritems():
+        for wid, w in self.workers.items():
             if len(w.tasks) > w.info['concurrency']:
                 return 'Worker %s has too many jobs - can have %s and has %d' \
                     % (str(wid), str(w.info['concurrency']), len(w.tasks))
@@ -59,9 +59,9 @@ class Manager(object):
         return 'OK'
 
     def _showInnerState(self):
-        for wid, w in self.workers.iteritems():
-            print 'Worker (id: %d, concurr: %d) does %s' % \
-                (wid, w.info['concurrency'], w.tasks)
+        for wid, w in self.workers.items():
+            print('Worker (id: %d, concurr: %d) does %s' % \
+                (wid, w.info['concurrency'], w.tasks))
 
     def getWorkers(self):
         return self.workers
@@ -319,7 +319,7 @@ def _randomTesting1(Scheduler, contests_count, workers_count, tasks_count):
             assert False
     man.schedule()
     while man.workers:
-        wid = man.workers.iterkeys().next()
+        wid = next(iter(man.workers.keys()))
         while man.workers[wid].tasks:
             man.completeOneTask(wid)
         man.delWorker(wid)

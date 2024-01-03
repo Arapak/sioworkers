@@ -1,3 +1,4 @@
+from builtins import str
 import os
 from shutil import rmtree
 from zipfile import ZipFile, is_zipfile
@@ -43,7 +44,7 @@ def run(environ, executor, use_sandboxes=True):
     exe_filename = file_executor.preferred_filename()
 
     ft.download(environ, 'exe_file', exe_filename, add_to_cache=True)
-    os.chmod(tempcwd(exe_filename), 0700)
+    os.chmod(tempcwd(exe_filename), 0o700)
     ft.download(environ, 'in_file', input_name, add_to_cache=True)
 
     zipdir = tempcwd('in_dir')
@@ -60,7 +61,7 @@ def run(environ, executor, use_sandboxes=True):
                     input_name = os.path.join(zipdir, f.namelist()[0])
             # zipfile throws some undocumented exceptions
             except Exception as e:
-                raise StandardError("Failed to open archive: " + unicode(e))
+                raise Exception("Failed to open archive: " + str(e))
 
         with file_executor as fe:
             with open(input_name, 'rb') as inf:
