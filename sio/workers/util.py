@@ -1,3 +1,4 @@
+import json
 from contextlib import contextmanager
 import pkg_resources
 import time
@@ -135,6 +136,17 @@ def path_join_abs(base, subpath):
 def replace_invalid_UTF(str):
     return str.decode('utf-8', 'replace').encode('utf-8')
 
+class CompatibleJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, bytes):
+            return obj.decode("ASCII")
+        return super(CompatibleJSONEncoder, self).default(obj)
+
+
+def json_dumps(obj, **kwargs):
+    """Python 3 and 2 compatible json.dump."""
+    kwargs.setdefault('cls', CompatibleJSONEncoder)
+    return json.dumps(obj, **kwargs)
 
 def null_ctx_manager():
     def dummy():

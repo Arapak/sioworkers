@@ -1,3 +1,4 @@
+from six import BytesIO
 from twisted.application.service import Service
 from twisted.internet import defer, reactor
 from twisted.internet.task import deferLater, LoopingCall
@@ -7,13 +8,13 @@ from twisted.web.http_headers import Headers
 from collections import namedtuple
 import bsddb3
 import json
-from io import StringIO
 import time
 from operator import itemgetter
 from sio.protocol.rpc import RemoteError
 from sio.sioworkersd.workermanager import WorkerGone
 from twisted.logger import Logger, LogLevel
-from requests_toolbelt.multipart.encoder import MultipartEncoder
+from urllib3 import encode_multipart_formdata
+from sio.workers.util import json_dumps
 
 log = Logger()
 
@@ -256,12 +257,18 @@ class TaskManager(Service):
         if not tid:
             tid = env['group_id']
 
-        mp_encoder = MultipartEncoder(fields=env)
-        headers = Headers({'User-Agent': ['sioworkersd'], 'Content-Type': mp_encoder.content_type})
+        body, content_type = encode_multipart_formdata({'data': json_dumps(env)})
+
+        headers = Headers(
+            {
+                'User-Agent': ['sioworkersd'],
+                'Content-Type': [content_type],
+            }
+        )
 
         def do_return():
-            d = self.agent.request('POST', url.encode('utf-8'),
-                    headers, mp_encoder)
+            producer = client.FileBodyProducer(BytesIO(body))
+            d = self.agent.request(b'POST', url.encode('utf-8'), headers, producer)
 
             @defer.inlineCallbacks
             def _response(r):
