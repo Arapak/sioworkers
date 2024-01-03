@@ -21,7 +21,7 @@ setup(
         'sortedcontainers==2.1.0',
         'six',
         'urllib3>=1.26.14,<2.0',
-        'celery==5.0.0',
+        'celery==4.4.7',
         'protobuf==4.25.1',
         'zope.interface==6.1'
     ],
